@@ -1,9 +1,5 @@
-const headerCityButton = document.querySelector('.header__city-button'),
-    subheaderCart = document.querySelector('.subheader__cart'),
-    cartOverlay = document.querySelector('.cart-overlay');
-
-
 //city-button
+const headerCityButton = document.querySelector('.header__city-button');
 
 headerCityButton.textContent = localStorage.getItem('lomoda-location') || 'Ваш город?';
 
@@ -26,7 +22,6 @@ const disableScroll = () => {
     overflow: hidden;
     padding-right: ${scrollWidth}px; 
     `;
-    console.log(scrollWidth);
 };
 
 const enableScroll = () => {
@@ -37,16 +32,57 @@ const enableScroll = () => {
 };
 
 //cart modal 
+const subheaderCart = document.querySelector('.subheader__cart');
+const cartOverlay = document.querySelector('.cart-overlay');
 
-subheaderCart.addEventListener('click', () => {
+const cartModalOpen = () => {
     cartOverlay.classList.add('cart-overlay-open');
     disableScroll();
-})
+};
+
+const cartModalClose = () => {
+    cartOverlay.classList.remove('cart-overlay-open');
+    disableScroll();
+};
+
+//db query
+
+const getData = async() => {
+    const data = await fetch('db2.json');
+
+    if (data.ok) {
+        return data.json()
+    } else {
+        throw new Error(
+            `Данные не были получены, ошибка ${data.status} ${data.statusText}`
+        )
+    }
+};
+
+const getGoods = callback => {
+    getData()
+        .then(data => {
+            callback(data);
+        })
+        .catch(err => {
+            console.log(err);
+        })
+}
+
+
+// cart open/close
+
+subheaderCart.addEventListener('click', cartModalOpen);
 
 cartOverlay.addEventListener('click', e => {
     const target = e.target;
     if (target.matches('.cart__btn-close') || target.matches('.cart-overlay')) {
-        cartOverlay.classList.remove('cart-overlay-open');
-        enableScroll();
+        cartModalClose();
     }
-})
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key == 'Escape') {
+        cartModalClose();
+    }
+});
