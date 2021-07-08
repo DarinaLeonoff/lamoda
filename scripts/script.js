@@ -98,8 +98,20 @@ document.addEventListener('keydown', e => {
 try {
     const goodsList = document.querySelector('.goods__list');
 
+
     if (!goodsList) {
         throw 'this is not a goods page!';
+    }
+
+    const categoryName = hash => {
+        const title = document.querySelector('.goods__title');
+        if (hash === 'men') {
+            title.textContent = 'Мужчинам'
+        } else if (hash === 'women') {
+            title.textContent = 'Женщинам'
+        } else if (hash === 'kids') {
+            title.textContent = 'Детям'
+        };
     }
 
     const createCard = ({ id, preview, cost, brand, name, sizes }) => {
@@ -137,26 +149,20 @@ try {
 
     const renderGoodsList = data => {
         goodsList.textContent = '';
-
+        categoryName(hash);
+        
         data.forEach(item => {
             const card = createCard(item);
             goodsList.append(card);
         });
+
         window.addEventListener('hashchange', () => {
             hash = location.hash.substring(1);
-            const title = document.querySelector('.goods__title');
-            if (hash === 'men') {
-                title.textContent = 'Мужчинам'
-            } else if (hash === 'women') {
-                title.textContent = 'Женщинам'
-            } else if (hash === 'kids') {
-                title.textContent = 'Детям'
-            } else {
-                title.textContent = ''
-            }
+            
             getGoods(renderGoodsList, hash);
-        })
+        });
     };
+
     getGoods(renderGoodsList, hash);
 } catch (err) {
     console.warn(err);
