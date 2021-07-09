@@ -1,5 +1,6 @@
 //city-button
 const headerCityButton = document.querySelector('.header__city-button');
+const cartListGoods = document.querySelector('.cart__list-goods');
 
 let hash = location.hash.substring(1); //#hash
 
@@ -10,6 +11,30 @@ headerCityButton.addEventListener('click', () => {
     headerCityButton.textContent = city;
     localStorage.setItem('lomoda-location', city)
 })
+
+//cart parsing 
+const getLocalStorage = () => JSON.parse(localStorage.getItem('cart-lomoda')) || [];
+const setLocalStrage = data => localStorage.setItem('cart-lomoda', JSON.stringify(data));
+
+const renderCart = () => {
+        cartListGoods.textContent = '';
+
+        const cartItem = getLocalStorage();
+
+        cartItem.forEach((item, i) => {
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                            <td>${i}</td>
+                            <td>${item.brand} ${item.name}</td>
+                            ${item.color ? `<td>${item.color}</td>` : `<td>-</td>`}
+                            ${item.size ? `<td>${item.size}</td>` : `<td>-</td>`}
+                            <td>${item.cost} &#8381;</td>
+                            <td><button class="btn-delete" data-id="${item.id}">&times;</button></td>
+                        `;
+            cartListGoods.append(tr);
+    })
+}
 
 //scroll
 
@@ -40,6 +65,7 @@ const cartOverlay = document.querySelector('.cart-overlay');
 const cartModalOpen = () => {
     cartOverlay.classList.add('cart-overlay-open');
     disableScroll();
+    renderCart();
 };
 
 const cartModalClose = () => {
@@ -91,6 +117,8 @@ document.addEventListener('keydown', e => {
         cartModalClose();
     }
 });
+
+
 
 //page constructor 
 
@@ -195,6 +223,9 @@ try {
     '');
 
     const renderCardGood = ([{ brand, name, cost, color, sizes, photo }]) => {
+
+        const data = { brand, name, cost, id };
+            
         cardGoodImage.src = `goods-image/${photo}`;
         cardGoodImage.alt = `${brand} ${name}`;
         cardGoodBrand.textContent = brand;
@@ -206,7 +237,7 @@ try {
             cardGoodColorList.innerHTML = generateList(color);
         } else {
             cardGoodColor.style.display = 'none';
-        };
+        }
         if (sizes) {
             cardGoodSizes.textContent = sizes[0];
             cardGoodSizes.dataset.id = 0;
@@ -214,6 +245,14 @@ try {
         } else {
             cardGoodSizes.style.display = 'none';
         };
+        cardGoodBuy.addEventListener('click', () => {
+            if (color) data.color = cardGoodColor.textContent;
+            if (sizes) data.sizes = cardGoodSizes.textContent;
+
+            const cartData = getLocalStorage();
+            cartData.push(data);
+            setLocalStrage(cartData);
+        });
     };
 
     cardGoodSelectWrapper.forEach(item => {
@@ -226,13 +265,15 @@ try {
 
             if (target.closest('.card-good__select-item')) {
                 const cardGoodSelect = item.querySelector('.card-good__select');
-                cardGoodSelect.textContent = target.textContent;
+                cardGoodSelect.textContent = target.textConent;
                 cardGoodSelect.dataset.id = target.dataset.id;
                 cardGoodSelect.classList.remove('card-good__select__open');
             }
         })
     })
     
+    
+
     getGoods(renderCardGood, 'id', hash)
    
 } catch (err) {
